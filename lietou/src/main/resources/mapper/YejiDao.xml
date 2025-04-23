@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.YejiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.bumenlingdao_id as bumenlingdaoId
+        ,a.yuangong_id as yuangongId
+        ,a.yeji_uuid_number as yejiUuidNumber
+        ,a.gongsi_name as gongsiName
+        ,a.gongsi_address as gongsiAddress
+        ,a.ticheng_jine as tichengJine
+        ,a.yeji_content as yejiContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.YejiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,bumenlingdao.bumenlingdao_name as bumenlingdaoName
+        ,bumenlingdao.bumenlingdao_phone as bumenlingdaoPhone
+        ,bumenlingdao.bumenlingdao_id_number as bumenlingdaoIdNumber
+        ,bumenlingdao.bumenlingdao_photo as bumenlingdaoPhoto
+        ,bumenlingdao.bumenlingdao_email as bumenlingdaoEmail
+        ,bumenlingdao.bumenlingdao_zhuzhi as bumenlingdaoZhuzhi
+        ,yuangong.yuangong_name as yuangongName
+        ,yuangong.yuangong_phone as yuangongPhone
+        ,yuangong.yuangong_id_number as yuangongIdNumber
+        ,yuangong.yuangong_photo as yuangongPhoto
+        ,yuangong.yuangong_email as yuangongEmail
+        ,yuangong.yuangong_zhuzhi as yuangongZhuzhi
+        ,yuangong.yuangong_delete as yuangongDelete
+
+        FROM yeji  a
+        left JOIN bumenlingdao bumenlingdao ON a.bumenlingdao_id = bumenlingdao.id
+        left JOIN yuangong yuangong ON a.yuangong_id = yuangong.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.bumenlingdaoId != null and params.bumenlingdaoId != ''">
+                and (
+                    a.bumenlingdao_id = #{params.bumenlingdaoId}
+                )
+            </if>
+            <if test="params.yuangongId != null and params.yuangongId != ''">
+                and (
+                    a.yuangong_id = #{params.yuangongId}
+                )
+            </if>
+            <if test=" params.yejiUuidNumber != '' and params.yejiUuidNumber != null and params.yejiUuidNumber != 'null' ">
+                and a.yeji_uuid_number like CONCAT('%',#{params.yejiUuidNumber},'%')
+            </if>
+            <if test=" params.gongsiName != '' and params.gongsiName != null and params.gongsiName != 'null' ">
+                and a.gongsi_name like CONCAT('%',#{params.gongsiName},'%')
+            </if>
+            <if test=" params.gongsiAddress != '' and params.gongsiAddress != null and params.gongsiAddress != 'null' ">
+                and a.gongsi_address like CONCAT('%',#{params.gongsiAddress},'%')
+            </if>
+            <if test="params.tichengJineStart != null ">
+                <![CDATA[  and a.ticheng_jine >= #{params.tichengJineStart}   ]]>
+            </if>
+            <if test="params.tichengJineEnd != null ">
+                <![CDATA[  and a.ticheng_jine <= #{params.tichengJineEnd}   ]]>
+            </if>
+            <if test=" params.yejiContent != '' and params.yejiContent != null and params.yejiContent != 'null' ">
+                and a.yeji_content like CONCAT('%',#{params.yejiContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断部门领导的id不为空 -->
+            <if test=" params.bumenlingdaoIdNotNull != '' and params.bumenlingdaoIdNotNull != null and params.bumenlingdaoIdNotNull != 'null' ">
+                and a.bumenlingdao_id IS NOT NULL
+            </if>
+            <if test=" params.bumenlingdaoName != '' and params.bumenlingdaoName != null and params.bumenlingdaoName != 'null' ">
+                and bumenlingdao.bumenlingdao_name like CONCAT('%',#{params.bumenlingdaoName},'%')
+            </if>
+            <if test=" params.bumenlingdaoPhone != '' and params.bumenlingdaoPhone != null and params.bumenlingdaoPhone != 'null' ">
+                and bumenlingdao.bumenlingdao_phone like CONCAT('%',#{params.bumenlingdaoPhone},'%')
+            </if>
+            <if test=" params.bumenlingdaoIdNumber != '' and params.bumenlingdaoIdNumber != null and params.bumenlingdaoIdNumber != 'null' ">
+                and bumenlingdao.bumenlingdao_id_number like CONCAT('%',#{params.bumenlingdaoIdNumber},'%')
+            </if>
+            <if test=" params.bumenlingdaoEmail != '' and params.bumenlingdaoEmail != null and params.bumenlingdaoEmail != 'null' ">
+                and bumenlingdao.bumenlingdao_email like CONCAT('%',#{params.bumenlingdaoEmail},'%')
+            </if>
+            <if test=" params.bumenlingdaoZhuzhi != '' and params.bumenlingdaoZhuzhi != null and params.bumenlingdaoZhuzhi != 'null' ">
+                and bumenlingdao.bumenlingdao_zhuzhi like CONCAT('%',#{params.bumenlingdaoZhuzhi},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(bumenlingdao.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(bumenlingdao.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断普通员工的id不为空 -->
+            <if test=" params.yuangongIdNotNull != '' and params.yuangongIdNotNull != null and params.yuangongIdNotNull != 'null' ">
+                and a.yuangong_id IS NOT NULL
+            </if>
+            <if test=" params.yuangongName != '' and params.yuangongName != null and params.yuangongName != 'null' ">
+                and yuangong.yuangong_name like CONCAT('%',#{params.yuangongName},'%')
+            </if>
+            <if test=" params.yuangongPhone != '' and params.yuangongPhone != null and params.yuangongPhone != 'null' ">
+                and yuangong.yuangong_phone like CONCAT('%',#{params.yuangongPhone},'%')
+            </if>
+            <if test=" params.yuangongIdNumber != '' and params.yuangongIdNumber != null and params.yuangongIdNumber != 'null' ">
+                and yuangong.yuangong_id_number like CONCAT('%',#{params.yuangongIdNumber},'%')
+            </if>
+            <if test=" params.yuangongEmail != '' and params.yuangongEmail != null and params.yuangongEmail != 'null' ">
+                and yuangong.yuangong_email like CONCAT('%',#{params.yuangongEmail},'%')
+            </if>
+            <if test=" params.yuangongZhuzhi != '' and params.yuangongZhuzhi != null and params.yuangongZhuzhi != 'null' ">
+                and yuangong.yuangong_zhuzhi like CONCAT('%',#{params.yuangongZhuzhi},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(yuangong.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(yuangong.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.yuangongDeleteStart != null  and params.yuangongDeleteStart != '' ">
+                <![CDATA[  and yuangong.yuangong_delete >= #{params.yuangongDeleteStart}   ]]>
+            </if>
+            <if test="params.yuangongDeleteEnd != null  and params.yuangongDeleteEnd != '' ">
+                <![CDATA[  and yuangong.yuangong_delete <= #{params.yuangongDeleteEnd}   ]]>
+            </if>
+            <if test="params.yuangongDelete != null  and params.yuangongDelete != '' ">
+                and yuangong.yuangong_delete = #{params.yuangongDelete}
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
